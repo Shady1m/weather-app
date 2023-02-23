@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="stylesheet" href="C:\Users\DELL\Videos\wither\f.css">
+</head>
+
+<body>
+	<h1>Weather</h1>
+	<label for="city-name">City:</label>
+	<input type="text" id="city-name">
+	<button id="search-button">Search:</button>
+	<div>
+	  <h2 id="city"> city</h2>
+	  <div>
+		<span id="temperature"> temperature:</span>
+	  </div>
+	  <p id="description">description:</p>
+	</div>
+	<script src="C:\Users\DELL\Videos\wither\node.js"></script>
+  </body>
+</html>
+<script>
+	const apiKey = '<your_api_key>&units=imperial';
+	
+	document.getElementById('generate').addEventListener('click', performAction);
+	
+	function performAction(e){
+		const zipCode = document.getElementById('zip').value;
+		const userResponse = document.getElementById('feelings').value;
+		getWeatherData(apiKey, zipCode)
+		.then(function(data){
+			postData('/add', {temperature: data.main.temp, date: newDate, userResponse: userResponse})
+		})
+		.then(function(){
+			updateUI();
+		})
+	}
+	
+	const getWeatherData = async (apiKey, zipCode)=>{
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${zipCode}&appid=${apiKey}`)
+		try {
+			const data = await response.json();
+			return data;
+		} catch(error) {
+			console.log("error", error);
+		}
+	}
+	
+	const postData = async (url = '', data = {}) => {
+		const response = await fetch(url, {
+			method: 'POST', 
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),       
+		});
+		try {
+			const newData = await response.json();
+			return newData;
+		} catch(error) {
+			console.log("error", error);
+		}
+	}
+	
+	const updateUI = async () => {
+		const request = await fetch('/all');
+		try{
+			const allData = await request.json();
+			document.getElementById('temp').innerHTML = `${Math.round(allData.temperature)} degrees`;
+			document.getElementById('date').innerHTML = allData.date;
+			document.getElementById('content').innerHTML = allData.userResponse;
+		} catch(error){
+			console.log("error", error);
+		}
+	}
+	
+	let d = new Date();
+	let newDate = d.getMonth()+1 + '.'+ d.getDate()+'.'+ d.getFullYear();
+</script>
